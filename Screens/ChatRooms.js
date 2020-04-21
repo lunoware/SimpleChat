@@ -29,18 +29,34 @@ class ChatRoomsScreen extends React.Component {
         database()
         .ref('chatrooms')
         .on('value', snapshot => {
-            console.log('User data: ', snapshot.val());
-            this.setState({ chatRooms: snapshot.val()});
+
+            const chatRooms = [];
+
+            snapshot.forEach(object => {
+                
+                const chatRoom = {
+                    key: object.key,
+                    name: object.val().name,
+                    description: object.val().description,
+                }
+
+                chatRooms.push(chatRoom);
+            });
+
+            this.setState({ chatRooms: chatRooms});
         });
     }
 
+    enterChatRoom(id){
+        this.props.navigation.navigate("Chatroom", {chatRoomId: id});
+    }
   
     render() {
         return (
         <View>
             <FlatList
                 data={this.state.chatRooms}
-                renderItem={({ item }) => <ChatRoomListItem name={item.name} description={item.description} />}
+                renderItem={({ item }) => <ChatRoomListItem name={item.name} description={item.description} onPress={() => this.enterChatRoom(item.key)} />}
                 keyExtractor={item => item.name}
             />
             <Button onPress={() => this._signOut()} title="Sign out"></Button>

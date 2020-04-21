@@ -3,15 +3,17 @@ import { Text, TouchableOpacity, StyleSheet, Image, View } from 'react-native';
 
 const ChatRoomListItem = (props) => {
     return(
-        <View style={styles.container}>
-            <View style={styles.info}>
-                <Text style={styles.nameLabel}>{props.name}</Text>
-                <Text style={styles.descriptionLabel}>{props.description}</Text>
+        <TouchableOpacity onPress={props.onPress} >
+            <View style={styles.container}>
+                <View style={styles.info}>
+                    <Text style={styles.nameLabel}>{props.name}</Text>
+                    <Text style={styles.descriptionLabel}>{props.description}</Text>
+                </View>
+                <Image style={styles.chevron}
+                    source={require('../src/images/chevron-right.png')}
+                />
             </View>
-            <Image style={styles.chevron}
-                source={require('../src/images/chevron-right.png')}
-            />
-        </View>
+        </TouchableOpacity>
     );
 }
 

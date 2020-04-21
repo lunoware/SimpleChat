@@ -54,7 +54,6 @@ export default function App() {
       <Stack.Navigator
         initialRouteName="Login"
         screenOptions={{ 
-          gestureEnabled: false, 
           animationTypeForReplace: user ? "push" : "pop" 
         }}
       >
@@ -63,12 +62,12 @@ export default function App() {
             <Stack.Screen
               name="Chatrooms"
               component={ChatRoomsScreen}
-              options={{ headerShown: true }}
+              options={{ title: 'Chat Rooms' }}
             />
             <Stack.Screen
               name="Chatroom"
               component={ChatRoomScreen}
-              options={{ title: 'Chat Room' }}
+              options={{ title: 'Chat Room', headerShown: true, headerTransparent: false }}
             />
           </>
         ) : (
