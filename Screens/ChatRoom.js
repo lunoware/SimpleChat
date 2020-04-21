@@ -20,6 +20,8 @@ import { HeaderHeightContext } from "@react-navigation/stack";
 
 import ChatMessageListItem from '../Components/ChatMessageListItem';
 
+import moment from "moment";
+
 class ChatRoomScreen extends React.Component {
 
     constructor(props){
@@ -27,8 +29,10 @@ class ChatRoomScreen extends React.Component {
         this.state = {
             messages: "",
             message: "",
-            currentUserUid: auth().currentUser.uid
+            currentUser: auth().currentUser
         }
+
+        console.log(auth().currentUser);
     }
 
     componentDidMount(){
@@ -44,7 +48,10 @@ class ChatRoomScreen extends React.Component {
                 const message = {
                     key: object.key,
                     message: object.val().message,
-                    createdBy: object.val().createdBy
+                    createdBy: object.val().createdBy,
+                    avatarUrl: object.val().avatarUrl,
+                    displayName: object.val().displayName,
+                    createdTimestamp: object.val().createdTimestamp
                 }
                 messages.push(message);
             });
@@ -52,6 +59,13 @@ class ChatRoomScreen extends React.Component {
             this.setState({ messages: messages.reverse()});
         });
     }
+/*
+    a. Avatar of sender 
+    b. Name of sender 
+    c. Message date
+    d. Message text
+*/
+
 
     sendMessage(){
         console.log("sending message",this.state.message);
@@ -64,9 +78,11 @@ class ChatRoomScreen extends React.Component {
 
         newReference
         .set({
-            createdBy: this.state.currentUserUid,
+            createdBy: this.state.currentUser.uid,
             message: this.state.message,
-            createdTimestamp: database.ServerValue.TIMESTAMP
+            createdTimestamp: database.ServerValue.TIMESTAMP,
+            avatarUrl: this.state.currentUser.photoURL,
+            displayName: this.state.currentUser.displayName
         })
         .then(() => {
             console.log('Data updated.');
@@ -87,7 +103,13 @@ class ChatRoomScreen extends React.Component {
                         <FlatList
                             inverted
                             data={this.state.messages}
-                            renderItem={({ item }) => <ChatMessageListItem message={item.message} myMessage={this.state.currentUserUid == item.createdBy}/>}
+                            renderItem={({ item }) => <ChatMessageListItem 
+                                                            message={item.message} 
+                                                            displayName={item.displayName}
+                                                            avatarUrl={item.avatarUrl} 
+                                                            messageDate={moment(new Date(item.createdTimestamp)).format('MM/DD/YYYY hh:MM')}
+                                                            myMessage={this.state.currentUser.uid == item.createdBy}
+                                                        />}
                             keyExtractor={item => item.name}
                         />
                     </View>
