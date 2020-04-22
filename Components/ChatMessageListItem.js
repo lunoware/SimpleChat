@@ -1,13 +1,20 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Text, TouchableOpacity, StyleSheet, Image, View } from 'react-native';
+import storage from '@react-native-firebase/storage';
 
 const ChatMessageListItem = (props) => {
+    const [imageUrl, setImageUrl] = useState();
 
     const containerStyle = props.myMessage ? [styles.container, styles.myMessageContainer] : styles.container;
     const textStyle = props.myMessage ? styles.myMessageText : null;
 
     const avatarUrl = { uri: props.avatarUrl};
  
+    if(props.imageName){
+        const ref = storage().ref("uploads/"+props.imageName);
+                ref.getDownloadURL().then(url => {setImageUrl(url)})
+                .catch(e=>{console.log(e);});
+    }
 
     return(
         <View>
@@ -19,6 +26,9 @@ const ChatMessageListItem = (props) => {
                 <View style={styles.content}>
                     <Text style={[styles.displayName, textStyle]}>{props.displayName}</Text>
                     <Text style={[styles.message, textStyle]}>{props.message}</Text>
+                    {imageUrl ? <Image resizeMode="contain" style={styles.image}
+                        source={ {uri: imageUrl} }
+                    /> : null}
                 </View>
             </View>
         </View>
@@ -70,6 +80,10 @@ const styles = StyleSheet.create({
         height: 40,
         borderRadius: 20,
         marginRight: 15
+    },
+    image: {
+        width: "100%",
+        height: 200,
     }
 });
 
