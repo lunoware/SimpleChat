@@ -1,5 +1,9 @@
+// React 
 import React from 'react';
+
+// React Native
 import { Text, TouchableOpacity, StyleSheet, Image, View } from 'react-native';
+
 
 const ChatRoomListItem = (props) => {
     return(
@@ -8,6 +12,7 @@ const ChatRoomListItem = (props) => {
                 <View style={styles.info}>
                     <Text style={styles.nameLabel}>{props.name}</Text>
                     <Text style={styles.descriptionLabel}>{props.description}</Text>
+                    <Text style={styles.lastModifiedLabel}>{props.lastModified}</Text>
                 </View>
                 <Image style={styles.chevron}
                     source={require('../src/images/chevron-right.png')}
@@ -19,7 +24,7 @@ const ChatRoomListItem = (props) => {
 
 const styles = StyleSheet.create({
     container: {
-        borderBottomColor: "black",
+        borderBottomColor: "#e0e0e0",
         borderBottomWidth: 1,
         paddingVertical: 20,
         paddingHorizontal: 20,
@@ -39,6 +44,9 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         alignSelf: "center"
+    },
+    lastModifiedLabel: {
+        color: "gray"
     }
 });
 
