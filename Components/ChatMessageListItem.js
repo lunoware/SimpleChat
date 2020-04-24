@@ -1,5 +1,10 @@
+// React 
 import React, {useState} from 'react';
-import { Text, TouchableOpacity, StyleSheet, Image, View } from 'react-native';
+
+// React Native
+import { Text, StyleSheet, Image, View } from 'react-native';
+
+// Firebase
 import storage from '@react-native-firebase/storage';
 
 const ChatMessageListItem = (props) => {

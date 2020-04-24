@@ -1,5 +1,7 @@
+// React Native
 import { Platform } from 'react-native';
 
+// Firebase 
 import storage from '@react-native-firebase/storage';
 
 export const FireBaseStorage = storage();

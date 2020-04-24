@@ -1,5 +1,10 @@
+// React 
 import React from 'react';
+
+// React Native
 import { View, Text, Button, StyleSheet, AsyncStorage } from 'react-native';
+
+// Firebase
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-community/google-signin';
 
