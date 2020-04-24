@@ -81,6 +81,12 @@ target 'SimpleChat' do
   # https://firebase.google.com/docs/ios/setup#available-pods
   pod 'GoogleSignIn'
 
+  # Add the Firebase pod for Google Analytics
+  pod 'Firebase/Analytics'
+
+  # Add the pod for Firebase Cloud Messaging
+  pod 'Firebase/Messaging'
+
   target 'SimpleChatTests' do
     inherit! :complete
     # Pods for testing

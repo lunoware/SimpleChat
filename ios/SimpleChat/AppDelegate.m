@@ -33,6 +33,29 @@ static void InitializeFlipper(UIApplication *application) {
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     [FIRApp configure];
+    /*[FIRMessaging messaging].delegate = self;
+    if ([UNUserNotificationCenter class] != nil) {
+      // iOS 10 or later
+      // For iOS 10 display notification (sent via APNS)
+      [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+      UNAuthorizationOptions authOptions = UNAuthorizationOptionAlert |
+          UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
+      [[UNUserNotificationCenter currentNotificationCenter]
+          requestAuthorizationWithOptions:authOptions
+          completionHandler:^(BOOL granted, NSError * _Nullable error) {
+            // ...
+          }];
+    } else {
+      // iOS 10 notifications aren't available; fall back to iOS 8-9 notifications.
+      UIUserNotificationType allNotificationTypes =
+      (UIUserNotificationTypeSound | UIUserNotificationTypeAlert | UIUserNotificationTypeBadge);
+      UIUserNotificationSettings *settings =
+      [UIUserNotificationSettings settingsForTypes:allNotificationTypes categories:nil];
+      [application registerUserNotificationSettings:settings];
+    }
+
+    [application registerForRemoteNotifications];*/
+  
 #if DEBUG
   InitializeFlipper(application);
 #endif
@@ -60,5 +83,37 @@ static void InitializeFlipper(UIApplication *application) {
   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
+
+/*
+- (void)messaging:(FIRMessaging *)messaging didReceiveRegistrationToken:(NSString *)fcmToken {
+    NSLog(@"FCM registration token: %@", fcmToken);
+    // Notify about received token.
+    NSDictionary *dataDict = [NSDictionary dictionaryWithObject:fcmToken forKey:@"token"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:
+     @"FCMToken" object:nil userInfo:dataDict];
+    NSLog(@"%@",dataDict);
+    // TODO: If necessary send token to application server.
+    // Note: This callback is fired at each app startup and whenever a new token is generated.
+}
+
+- (void)application:(UIApplication *)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken
+{
+  NSLog(@"%@", [self hexadecimalStringFromData: deviceToken]);
+}
+
+- (NSString *)hexadecimalStringFromData:(NSData *)data
+{
+  NSUInteger dataLength = data.length;
+  if (dataLength == 0) {
+    return nil;
+  }
+
+  const unsigned char *dataBuffer = (const unsigned char *)data.bytes;
+  NSMutableString *hexString  = [NSMutableString stringWithCapacity:(dataLength * 2)];
+  for (int i = 0; i < dataLength; ++i) {
+    [hexString appendFormat:@"%02x", dataBuffer[i]];
+  }
+  return [hexString copy];
+}*/
 
 @end
