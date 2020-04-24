@@ -2,19 +2,21 @@
 import React from 'react';
 import {
   View,
-  Text,
   Image,
   TouchableOpacity,
   FlatList,
   StyleSheet,
   TextInput,
   KeyboardAvoidingView,
-  ActivityIndicator
+  ActivityIndicator,
+  AppState,
+  Text
 } from 'react-native';
 
 // Firebase
 import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
+import messaging from '@react-native-firebase/messaging';
 
 // Fix for avoid keyboard with header issue
 import { HeaderHeightContext } from "@react-navigation/stack";
@@ -35,7 +37,7 @@ import { imagePickerOptions, uploadFileToFireBase } from '../utils';
 const numberOfMessagesInBulk = 50;
 
 class ChatRoomScreen extends React.Component {
-
+    
     constructor(){
         super();
         this.state = {
@@ -43,7 +45,8 @@ class ChatRoomScreen extends React.Component {
             message: "",
             currentUser: auth().currentUser,
             imageToUpload: null,
-            numberOfMessages: numberOfMessagesInBulk
+            numberOfMessages: numberOfMessagesInBulk,
+            isSubscribed: true
         }
     }
 
@@ -51,16 +54,53 @@ class ChatRoomScreen extends React.Component {
 
         // Get room id for current chat room
         const chatRoomId = this.props.route.params.chatRoomId;
-
-        this.databaseRef = database()
-        .ref('chatrooms/'+chatRoomId+'/messages');
+        this.roomRef = database().ref('chatrooms/'+chatRoomId);
+        this.messagesRef = database().ref('chatrooms/'+chatRoomId+'/messages');
 
         this.getMessages();
+
+        AppState.addEventListener('change', this._handleAppStateChange);
+
+        this.getSubscriptionStatus(status => this.setState({isSubscribed: status}));
     }
+
+    getSubscriptionStatus = async (callback) => {
+        const fcmToken = await messaging().getToken();
+        this.roomRef
+        .child("subscribers/"+fcmToken)
+        .on('value',snapshot => {
+            if(snapshot.val()){
+                callback(true);
+            }else{
+                callback(false);
+            }
+        });
+    }
+
+    setSubscribed = async (status) => {
+
+        const userId = auth().currentUser.uid;
+        const fcmToken = await messaging().getToken();
+
+        if(status == true){
+            this.roomRef.child("subscribers/"+fcmToken).set(userId).then(() => console.log('Added device token to subscribers.'));
+        } else {
+            this.roomRef.child("subscribers/"+fcmToken).remove();
+        }
+    }
+
+    _handleAppStateChange = (nextAppState) => {
+        // If device enters background mode navigate back to chatrooms
+        if (nextAppState === 'background') {
+            this.props.navigation.navigate("Chatrooms");
+        }
+    }
+    
 
     getMessages = () => {
         //Get last 50 messages from this room
-        this.databaseRef.orderByChild('createdTimestamp')
+        this.messagesRef
+        .orderByChild('createdTimestamp')
         .limitToLast(this.state.numberOfMessages)
         .on('value', snapshot => {
             // Create array of messages to populate chat messages
@@ -119,16 +159,10 @@ class ChatRoomScreen extends React.Component {
         // Create file name for image (if the user added an image)
         const fileName = this.state.imageToUpload != null ? auth().currentUser.uid + "-" + new Date() : "";
 
-        // Get current chat room id
-        const chatRoomId = this.props.route.params.chatRoomId;
-
-        // Create database reference to the messenges in this room
-        const newReference = database()
-        .ref('chatrooms/'+chatRoomId+"/messages")
-        .push();
-
         // Add new message to list of messages
-        newReference
+        this.roomRef
+        .child("messages")
+        .push()
         .set({
             createdBy: this.state.currentUser.uid,
             message: this.state.message,
@@ -139,6 +173,9 @@ class ChatRoomScreen extends React.Component {
         })
         .then(() => {
             console.log('Data updated.');
+            
+            this.updateRoomStatus();
+
             // Clear message field
             this.setState({message: ""});
 
@@ -146,6 +183,15 @@ class ChatRoomScreen extends React.Component {
             if(this.state.imageToUpload != null){
                 this.uploadImage(fileName);
             }
+        });
+    }
+
+    updateRoomStatus = () => {
+        this.roomRef
+        .child("lastModified")
+        .set(database.ServerValue.TIMESTAMP)
+        .then(() => {
+            console.log("Updated room");
         });
     }
 
@@ -217,6 +263,12 @@ class ChatRoomScreen extends React.Component {
                                 onChangeText={text => this.setState({message: text})}
                                 value={this.state.message}
                             />
+                            <TouchableOpacity style={styles.imageSelectInput} onPress={() => this.setSubscribed(!this.state.isSubscribed)}>
+                                <Image
+                                    source={ this.state.isSubscribed ? require('../src/images/subscribed.png') : require('../src/images/unsubscribed.png') }
+                                    style={styles.subscribeIcon}
+                                />
+                            </TouchableOpacity>
                             <TouchableOpacity style={styles.imageSelectInput} onPress={this.selectImage}>
                                 <Image
                                     source={ require('../src/images/camera.png') }
@@ -263,11 +315,16 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        marginLeft: 10
     },
     cameraIcon: {
         width: 30,
         height: 30
+    },
+    subscribeIcon: {
+        width: 30,
+        height: 30,
     },
     imagePreview: {
         width: 100,
