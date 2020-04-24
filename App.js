@@ -17,6 +17,11 @@ const Stack = createStackNavigator();
 // React
 import React, { useState, useEffect } from 'react';
 
+// React Native
+import {
+  Button,
+} from 'react-native';
+
 // Screens
 import LoginScreen from './Screens/Login';
 import ChatRoomsScreen from './Screens/ChatRooms';
@@ -62,7 +67,16 @@ export default function App() {
             <Stack.Screen
               name="Chatrooms"
               component={ChatRoomsScreen}
-              options={{ title: 'Chat Rooms' }}
+              options={{ 
+                title: 'Chat Rooms',
+                headerLeft: () => (
+                  <Button
+                    onPress={() => _signOut()}
+                    title="Logout"
+                  />
+                ),
+              }}
+              
             />
             <Stack.Screen
               name="Chatroom"
@@ -83,3 +97,13 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
+const _signOut = async () => {
+  auth().signOut().then(function() {
+      console.log('Signed Out');
+  }, function(error) {
+      console.error('Sign Out Error', error);
+  });
+};
+
+
