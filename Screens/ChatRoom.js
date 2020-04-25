@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   ActivityIndicator,
   AppState,
-  Text
+  Alert
 } from 'react-native';
 
 // Firebase
@@ -85,8 +85,21 @@ class ChatRoomScreen extends React.Component {
         if(status == true){
             this.roomRef.child("subscribers/"+fcmToken).set(userId).then(() => console.log('Added device token to subscribers.'));
         } else {
-            this.roomRef.child("subscribers/"+fcmToken).remove();
+            this.roomRef.child("subscribers/"+fcmToken).set("").then(() => console.log('Added device token to subscribers.'));
         }
+    }
+
+    hasSubscribeKey = async (callback) => {
+        const fcmToken = await messaging().getToken();
+        this.roomRef
+        .child("subscribers")
+        .once('value',snapshot => {
+            if(snapshot.hasChild(fcmToken)){
+                callback(true);
+            }else{
+                callback(false);
+            }
+        });
     }
 
     _handleAppStateChange = (nextAppState) => {
@@ -182,6 +195,20 @@ class ChatRoomScreen extends React.Component {
             // Start uploading image if user selected an image
             if(this.state.imageToUpload != null){
                 this.uploadImage(fileName);
+            }
+        });
+
+        this.hasSubscribeKey(exsist => {
+            if(!exsist){
+                Alert.alert(
+                    'Get notified',
+                    'Do you want to get notifications when other people write in this group? \nYou can change this later by tapping the bell icon.',
+                    [
+                      {text: 'Yes', onPress: () => this.setSubscribed(true)},
+                      {text: 'No', onPress: () => this.setSubscribed(false)},
+                    ],
+                    {cancelable: false},
+                  );
             }
         });
     }
