@@ -41,11 +41,22 @@ class ChatRoomScreen extends React.Component {
     constructor(){
         super();
         this.state = {
-            messages: "",
+            // Array of messages to be displayed
+            messages: [],
+            
+            // Message string the user inputs
             message: "",
+
+            // Reference to current user
             currentUser: auth().currentUser,
+
+            // Image data to upload with message 
             imageToUpload: null,
+
+            // Number of messages that should be displayed
             numberOfMessages: numberOfMessagesInBulk,
+
+            // Is user subscribed to notifications for this room
             isSubscribed: true
         }
     }
@@ -54,16 +65,24 @@ class ChatRoomScreen extends React.Component {
 
         // Get room id for current chat room
         const chatRoomId = this.props.route.params.chatRoomId;
+
+        // Database reference to this room
         this.roomRef = database().ref('chatrooms/'+chatRoomId);
+
+        // Database reference to the messages of this room
         this.messagesRef = database().ref('chatrooms/'+chatRoomId+'/messages');
 
+        // Get messages
         this.getMessages();
 
+        // App changed state listener
         AppState.addEventListener('change', this._handleAppStateChange);
 
+        // Get users current subscription status
         this.getSubscriptionStatus(status => this.setState({isSubscribed: status}));
     }
 
+    // Checks if user has subscribed to notifications and returns bool to callback
     getSubscriptionStatus = async (callback) => {
         const fcmToken = await messaging().getToken();
         this.roomRef
@@ -77,18 +96,26 @@ class ChatRoomScreen extends React.Component {
         });
     }
 
+    // Set subscription status 
     setSubscribed = async (status) => {
 
+        // Get user id 
         const userId = auth().currentUser.uid;
+
+        // Get device token 
         const fcmToken = await messaging().getToken();
 
+
         if(status == true){
+            // Add device token and user id as key value to subscribers 
             this.roomRef.child("subscribers/"+fcmToken).set(userId).then(() => console.log('Added device token to subscribers.'));
         } else {
+            // Remove user id for key = device token 
             this.roomRef.child("subscribers/"+fcmToken).set("").then(() => console.log('Added device token to subscribers.'));
         }
     }
 
+    // Check if device token exists in subscribers and return bool to callback
     hasSubscribeKey = async (callback) => {
         const fcmToken = await messaging().getToken();
         this.roomRef
@@ -102,6 +129,7 @@ class ChatRoomScreen extends React.Component {
         });
     }
 
+    // Handle change in app state
     _handleAppStateChange = (nextAppState) => {
         // If device enters background mode navigate back to chatrooms
         if (nextAppState === 'background') {
@@ -109,9 +137,9 @@ class ChatRoomScreen extends React.Component {
         }
     }
     
-
+    // Get messages and update automatically on change
     getMessages = () => {
-        //Get last 50 messages from this room
+
         this.messagesRef
         .orderByChild('createdTimestamp')
         .limitToLast(this.state.numberOfMessages)
@@ -187,7 +215,8 @@ class ChatRoomScreen extends React.Component {
         .then(() => {
             console.log('Data updated.');
             
-            this.updateRoomStatus();
+            // Update last modified timestamp for this room
+            this.updateRoomLastModified();
 
             // Clear message field
             this.setState({message: ""});
@@ -213,7 +242,8 @@ class ChatRoomScreen extends React.Component {
         });
     }
 
-    updateRoomStatus = () => {
+    // Set last modified date for room to current timestamp 
+    updateRoomLastModified = () => {
         this.roomRef
         .child("lastModified")
         .set(database.ServerValue.TIMESTAMP)

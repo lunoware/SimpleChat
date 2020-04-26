@@ -7,14 +7,22 @@ import { Text, StyleSheet, Image, View } from 'react-native';
 // Firebase
 import storage from '@react-native-firebase/storage';
 
+
 const ChatMessageListItem = (props) => {
+
+    // Url to an image for this message
     const [imageUrl, setImageUrl] = useState();
 
+    // Style message container depending on whether it is the users own message or someone else 
     const containerStyle = props.myMessage ? [styles.container, styles.myMessageContainer] : styles.container;
+
+    // Change text color if message is from device user
     const textStyle = props.myMessage ? styles.myMessageText : null;
 
+    // Url to the message owners avatar
     const avatarUrl = { uri: props.avatarUrl};
  
+    // If the message contains an image name then get the download url and pass it to imageUrl
     if(props.imageName){
         const ref = storage().ref("uploads/"+props.imageName);
                 ref.getDownloadURL().then(url => {setImageUrl(url)})

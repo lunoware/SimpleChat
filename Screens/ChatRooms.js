@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 
 // Firebase
-import auth from '@react-native-firebase/auth';
 import database from '@react-native-firebase/database';
 
 // Components
@@ -29,13 +28,16 @@ async function requestUserPermission() {
   }
 }
 
-// Set up event
+// Set up event listener for notifications 
 async function setupNotificationEventListeners(callback) {
+
+    // When a notification is pressed in background get notification data and send to callback
     messaging().onNotificationOpenedApp(async remoteMessage => {
         const data = remoteMessage.data; 
         callback(data);
     });
 
+    // When a notification is pressed while app is in quit state get notification data and send to callback
     messaging().getInitialNotification()
     .then((remoteMessage) => {
         if (remoteMessage) {
@@ -51,21 +53,37 @@ class ChatRoomsScreen extends React.Component {
         super();
         
         this.state = {
+            // Is room data being loaded
             isFetching: false,
+
+            // Array of chatroom data
             chatRooms: []
         }
     }
 
     componentDidMount(){
+
+        // Database reference for chatrooms
         this.databaseRef = database()
         .ref('chatrooms');
+
+        // Get room data
         this.getRooms();
+
+        // Request permission to send notifications 
         requestUserPermission();
-        setupNotificationEventListeners(notificationData => this.enterChatRoom(notificationData.roomId));
+
+        // Setup notifcation listeners 
+        setupNotificationEventListeners(notificationData => {
+            // When user presses notification get the room id redirect to that room
+            this.enterChatRoom(notificationData.roomId)
+        });
     }
 
+    // Get room data
     getRooms = () => {
 
+        // Get all room data once
         this.databaseRef
         .once('value')
         .then(snapshot => {
@@ -82,15 +100,19 @@ class ChatRoomsScreen extends React.Component {
                 chatRooms.push(chatRoom);
             });
     
+            // Add chat room data to state and stop activity indicator
             this.setState({ chatRooms: chatRooms, isFetching: false });
         });
     }
 
+    // Takes id of a chat room and navigates to that room
     enterChatRoom(id){
         this.props.navigation.navigate("Chatroom", {chatRoomId: id});
     }
 
+    // Refresh chat rooms data
     onRefresh() {
+        // Start activity indicator and start getting chat rooms data
         this.setState({ isFetching: true }, function() { this.getRooms() });
     }
   

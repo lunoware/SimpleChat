@@ -5,9 +5,7 @@ import React from 'react';
 import { 
     View, 
     Text, 
-    Button, 
     StyleSheet, 
-    AsyncStorage,
     ActivityIndicator,
     Alert,
     TouchableOpacity,
@@ -57,12 +55,17 @@ class LoginScreen extends React.Component {
     constructor () {
         super();
         this.state = {
+
+            // Should the screen show an activity indicator
             loading: false,
+
+            // Face in opacity 
             fadeAnim: new Animated.Value(0)
         }
     }
 
     componentDidMount (){
+        // Start fading in the screen
         Animated.timing(
             this.state.fadeAnim,
             {
@@ -93,18 +96,40 @@ class LoginScreen extends React.Component {
         );
     }
 
+    // Login with Google account 
     _googleSignInAsync = async () => {
+        // Start activity iindicator  
         this.setState({loading: true});
         onGoogleButtonPress()
-        .then(() => this.setState({loading: false}))
-        .catch(() => {this.setState({loading: false}); Alert.alert("Could not sign in")});
+        .then(() => {
+            // Stop activity iindicator  
+            this.setState({loading: false})
+        })
+        .catch(() => {
+            // Stop activity iindicator  
+            this.setState({loading: false}); 
+
+            // Inform user that something went wrong
+            Alert.alert("Could not sign in")
+        });
     };
 
+    // Login with Facebook account 
     _facebookSignInAsync = async () => {
+        // Start activity iindicator 
         this.setState({loading: true});
         onFacebookButtonPress()
-        .then(() => this.setState({loading: false}))
-        .catch((error) => {this.setState({loading: false}); Alert.alert(error)});
+        .then(() => {
+            // Stop activity iindicator  
+            this.setState({loading: false})
+        })
+        .catch((error) => {
+            // Stop activity iindicator  
+            this.setState({loading: false}); 
+
+            // Inform user that something went wrong
+            Alert.alert(error)
+        });
     };
 }    
 
