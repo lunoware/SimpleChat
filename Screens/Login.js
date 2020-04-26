@@ -128,7 +128,8 @@ class LoginScreen extends React.Component {
             this.setState({loading: false}); 
 
             // Inform user that something went wrong
-            Alert.alert(error)
+            Alert.alert("Could not sign in")
+            console.log(error);
         });
     };
 }    

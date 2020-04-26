@@ -27,6 +27,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>fb228781251778976</string>
 				<string>simplechat</string>
 				<string>com.googleusercontent.apps.952757939735-2mdvkq2gaggbcd7s7736kmp2l81reu2a</string>
 			</array>
@@ -55,6 +56,13 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>fbauth2</string>
+		<string>fb-messenger-share-api</string>
+	</array>
+	<key>FacebookAppID</key>
+	<string>228781251778976</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UIBackgroundModes</key>
